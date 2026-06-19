@@ -22,21 +22,17 @@ WORKDIR /var/www/html
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# ============================================================
-# 🔥 FIX: Create the cache directory AND set permissions 
-#        BEFORE running composer install
-# ============================================================
+# Create cache & storage directories and set permissions
 RUN mkdir -p /var/www/html/bootstrap/cache /var/www/html/storage && \
     chown -R www-data:www-data /var/www/html/bootstrap /var/www/html/storage && \
     chmod -R 775 /var/www/html/bootstrap/cache /var/www/html/storage
 
 # Install PHP dependencies (production mode)
-# This will now run 'php artisan package:discover' successfully
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Double-check permissions after install (just to be safe)
+# Double-check permissions after install
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Expose the dynamic port from Render and start Laravel
-CMD php artisan serve --host=0.0.0.0 --port=$PORT
+# 🔥 NEW: Run migrations AND storage:link automatically on container start
+CMD php artisan storage:link && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT
