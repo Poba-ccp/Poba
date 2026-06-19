@@ -3,7 +3,7 @@
 .gitignore
 vendor/
 node_modules/
-storage/app/public/
+#storage/app/public/
 storage/framework/cache/
 storage/framework/sessions/
 storage/framework/views/
