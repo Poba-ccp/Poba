@@ -26,3 +26,6 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+/storage/app/public/cms/
+/storage/app/public/events/
+/storage/app/public/news/

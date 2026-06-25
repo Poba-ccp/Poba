@@ -1,115 +1,140 @@
-{{-- FILE: resources/views/customer/events/index.blade.php --}}
 @extends('layouts.app')
 @section('title','Events - POBA')
 @section('content')
 
-<section class="section-pad" style="padding-top: 40px;">
+<section class="section-pad" style="padding-top:40px">
     <div class="container">
-        
-        {{-- Clean & Centered Page Title with Full Text Underline --}}
-        <div style="text-align: center; margin-bottom: 40px;">
-            <h1 style="font-size: 2.5rem; font-weight: 700; color: #086666; display: inline-block; padding-bottom: 8px; border-bottom: 4px solid var(--orange); line-height: 1.2;">
+
+        <div style="text-align:center;margin-bottom:40px">
+            <h1 style="font-size:2.5rem;font-weight:700;color:#086666;display:inline-block;padding-bottom:8px;border-bottom:4px solid var(--orange);line-height:1.2">
                 Events
             </h1>
         </div>
 
+        {{-- Flash messages --}}
+        @if(session('success'))
+            <div style="margin-bottom:20px;padding:12px 18px;background:#e1f5ee;border:1px solid #5dcaa5;border-radius:8px;color:#0f6e56;font-size:14px">
+                ✓ {{ session('success') }}
+            </div>
+        @endif
+        @if(session('error'))
+            <div style="margin-bottom:20px;padding:12px 18px;background:#fcebeb;border:1px solid #f09595;border-radius:8px;color:#a32d2d;font-size:14px">
+                ✕ {{ session('error') }}
+            </div>
+        @endif
+
+        {{-- Tabs --}}
         <div class="tab-btns">
-            <button class="tab-btn active" id="btnUpcoming" onclick="showTab('upcoming')">Upcoming</button>
-            <button class="tab-btn" id="btnPrevious" onclick="showTab('previous')">Previous</button>
+            <button class="tab-btn active" id="btnUpcoming" data-tab="upcoming">Upcoming</button>
+            <button class="tab-btn"         id="btnPrevious" data-tab="previous">Previous</button>
         </div>
 
-        {{-- Upcoming Events --}}
+        {{-- Upcoming Events Container --}}
         <div id="tabUpcoming">
-            @forelse($upcoming as $event)
-            <div class="event-card" id="event-{{ $event->id }}">
-                <div class="event-date">
-                    <div class="day">{{ \Carbon\Carbon::parse($event->start_date)->format('d') }}</div>
-                    <div class="month-year">{{ \Carbon\Carbon::parse($event->start_date)->format('M Y') }}</div>
-                </div>
-                <img class="event-thumb" src="{{ $event->logo ? asset('storage/'.$event->logo) : 'https://placehold.co/100x80/1a7a7a/fff?text=Event' }}" alt="{{ $event->title }}">
-                <div class="event-info">
-                    <h4>{{ $event->title }}</h4>
-                    <div class="event-meta">
-                        <span>📍 {{ $event->location }}</span>
-                        <span>📅 {{ \Carbon\Carbon::parse($event->start_date)->format('d/m/Y') }} - {{ \Carbon\Carbon::parse($event->end_date)->format('d/m/Y') }}</span>
-                        <span>🕐 {{ \Carbon\Carbon::parse($event->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($event->end_time)->format('H:i') }}</span>
-                    </div>
-                    <div class="event-focal">
-                        <strong>Focal Person</strong><br>{{ $event->focal_person_name }} - {{ $event->focal_person_number }}
-                    </div>
-                    <div class="event-desc" id="desc-{{ $event->id }}" style="display:none">
-                        @if($event->entry_batches)<p><strong>Entry:</strong> {{ implode(', ', $event->entry_batches) }}</p>@endif
-                        <p>{{ $event->description }}</p>
-                    </div>
-                    <a href="#" onclick="toggleDesc({{ $event->id }}); return false;" style="font-size:13px;color:var(--orange);font-weight:600;margin-top:8px;display:inline-block" id="seeMore-{{ $event->id }}">See More</a>
-                </div>
-                <div class="event-actions">
-                    @auth('alumni')
-                        @if(in_array($event->id, $myEventIds))
-                            <form method="POST" action="{{ route('events.cancel', $event->id) }}">@csrf
-                                <button type="submit" class="btn-outline-orange" style="font-size:13px;padding:8px 16px">Cancel Registration</button>
-                            </form>
-                        @else
-                            <form method="POST" action="{{ route('events.register', $event->id) }}">@csrf
-                                <button type="submit" class="btn-teal" style="font-size:13px;padding:8px 16px">Register Now</button>
-                            </form>
-                        @endif
-                    @else
-                        <a href="{{ route('login') }}" class="btn-teal" style="font-size:13px;padding:8px 16px">Register Now</a>
-                    @endauth
-                </div>
+            <div id="upcoming-events">
+                @include('customer.events._event_cards', [
+                    'events'          => $upcoming,
+                    'myEventIds'      => $myEventIds,
+                    'myParticipations'=> $myParticipations,
+                    'isPrevious'      => false,
+                ])
             </div>
-            @empty
-            <div style="text-align:center;padding:60px;color:var(--text-muted)">No upcoming events at the moment.</div>
-            @endforelse
+            @if($upcoming->hasMorePages())
+                <div class="load-more-wrapper" id="upcoming-load-more">
+                    <button class="btn-teal load-more-btn" data-tab="upcoming" data-page="{{ $upcoming->currentPage() + 1 }}">
+                        Load More
+                    </button>
+                </div>
+            @endif
         </div>
 
-        {{-- Previous Events --}}
+        {{-- Previous Events Container --}}
         <div id="tabPrevious" style="display:none">
-            @forelse($previous as $event)
-            <div class="event-card">
-                <div class="event-date">
-                    <div class="day">{{ \Carbon\Carbon::parse($event->start_date)->format('d') }}</div>
-                    <div class="month-year">{{ \Carbon\Carbon::parse($event->start_date)->format('M Y') }}</div>
-                </div>
-                <img class="event-thumb" src="{{ $event->logo ? asset('storage/'.$event->logo) : 'https://placehold.co/100x80/1a7a7a/fff?text=Event' }}" alt="{{ $event->title }}">
-                <div class="event-info">
-                    <h4>{{ $event->title }}</h4>
-                    <div class="event-meta">
-                        <span>📍 {{ $event->location }}</span>
-                        <span>📅 {{ \Carbon\Carbon::parse($event->start_date)->format('d/m/Y') }} - {{ \Carbon\Carbon::parse($event->end_date)->format('d/m/Y') }}</span>
-                        <span>🕐 {{ \Carbon\Carbon::parse($event->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($event->end_time)->format('H:i') }}</span>
-                    </div>
-                    <div class="event-focal">
-                        <strong>Focal Person</strong><br>{{ $event->focal_person_name }} - {{ $event->focal_person_number }}
-                    </div>
-                    <a href="#" onclick="toggleDesc({{ $event->id }}); return false;" style="font-size:13px;color:var(--orange);font-weight:600;margin-top:8px;display:inline-block">See More</a>
-                </div>
-                <div class="event-actions">
-                    <a href="{{ route('gallery.index') }}" class="btn-outline-teal" style="font-size:13px;padding:8px 16px">View Gallery</a>
-                </div>
+            <div id="previous-events">
+                @include('customer.events._event_cards', [
+                    'events'          => $previous,
+                    'myEventIds'      => $myEventIds,
+                    'myParticipations'=> $myParticipations,
+                    'isPrevious'      => true,
+                ])
             </div>
-            @empty
-            <div style="text-align:center;padding:60px;color:var(--text-muted)">No previous events.</div>
-            @endforelse
+            @if($previous->hasMorePages())
+                <div class="load-more-wrapper" id="previous-load-more">
+                    <button class="btn-teal load-more-btn" data-tab="previous" data-page="{{ $previous->currentPage() + 1 }}">
+                        Load More
+                    </button>
+                </div>
+            @endif
         </div>
+
     </div>
 </section>
 
 @push('scripts')
 <script>
-function showTab(tab) {
-    document.getElementById('tabUpcoming').style.display = tab==='upcoming' ? 'block' : 'none';
-    document.getElementById('tabPrevious').style.display = tab==='previous' ? 'block' : 'none';
-    document.getElementById('btnUpcoming').classList.toggle('active', tab==='upcoming');
-    document.getElementById('btnPrevious').classList.toggle('active', tab==='previous');
-}
-function toggleDesc(id) {
-    const d = document.getElementById('desc-'+id);
-    const s = document.getElementById('seeMore-'+id);
-    if (d.style.display==='none') { d.style.display='block'; s.textContent='See Less'; }
-    else { d.style.display='none'; s.textContent='See More'; }
-}
+    // ── Tab switching ──────────────────────────────────────────────
+    function showTab(tab) {
+        document.getElementById('tabUpcoming').style.display = tab === 'upcoming' ? 'block' : 'none';
+        document.getElementById('tabPrevious').style.display = tab === 'previous' ? 'block' : 'none';
+        document.getElementById('btnUpcoming').classList.toggle('active', tab === 'upcoming');
+        document.getElementById('btnPrevious').classList.toggle('active', tab === 'previous');
+    }
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            showTab(this.dataset.tab);
+        });
+    });
+
+    // ── Toggle description (See More / See Less) ─────────────────
+    function toggleDesc(id) {
+        const desc = document.getElementById('desc-' + id);
+        const link = document.getElementById('seeMore-' + id);
+        if (desc.style.display === 'none') {
+            desc.style.display = 'block';
+            link.textContent = 'See Less';
+        } else {
+            desc.style.display = 'none';
+            link.textContent = 'See More';
+        }
+    }
+
+    // ── Load More (AJAX) ──────────────────────────────────────────
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('load-more-btn')) {
+            const btn = e.target;
+            const tab = btn.dataset.tab;
+            const page = parseInt(btn.dataset.page);
+            const containerId = tab === 'upcoming' ? 'upcoming-events' : 'previous-events';
+            const wrapperId = tab === 'upcoming' ? 'upcoming-load-more' : 'previous-load-more';
+
+            btn.disabled = true;
+            btn.textContent = 'Loading...';
+
+            fetch(`?tab=${tab}&${tab}_page=${page}`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Append new cards to the container
+                document.getElementById(containerId).insertAdjacentHTML('beforeend', data.html);
+
+                // Update or remove the load-more button
+                if (data.hasMore) {
+                    btn.dataset.page = page + 1;
+                    btn.disabled = false;
+                    btn.textContent = 'Load More';
+                } else {
+                    document.getElementById(wrapperId).remove();
+                }
+            })
+            .catch(() => {
+                btn.disabled = false;
+                btn.textContent = 'Load More';
+                alert('Something went wrong. Please try again.');
+            });
+        }
+    });
 </script>
 @endpush
 @endsection

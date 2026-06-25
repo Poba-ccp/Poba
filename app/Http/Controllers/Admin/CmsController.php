@@ -61,12 +61,16 @@ class CmsController extends Controller
     }
 
     // ── News ──────────────────────────────────────────────────────────────────
+   // ── News ──────────────────────────────────────────────────────────────────
     public function news(Request $request) {
         $query = News::query();
         if ($request->search) $query->where('title','like',"%{$request->search}%");
         if ($request->type)   $query->where('type', $request->type);
         $news = $query->orderByDesc('created_at')->paginate(10);
         return view('admin.cms.news', compact('news'));
+    }
+    public function createNews() {
+        return view('admin.cms.news_create');
     }
     public function storeNews(Request $request) {
         $request->validate(['title'=>'required']);
@@ -76,7 +80,7 @@ class CmsController extends Controller
             $data['image'] = $request->file('image')->store('news','public');
         }
         News::create($data);
-        return back()->with('success','News added.');
+        return redirect()->route('admin.cms.news')->with('success','News added.');
     }
     public function editNews($id) {
         $item = News::findOrFail($id);
@@ -97,6 +101,25 @@ class CmsController extends Controller
         if ($item->image) Storage::disk('public')->delete($item->image);
         $item->delete();
         return back()->with('success','News deleted.');
+    }
+    public function showNews($id)
+{
+    $item = News::findOrFail($id);
+    return view('admin.cms.news_show', compact('item'));
+}
+    public function exportNews() {
+        $news = News::orderByDesc('created_at')->get();
+        $csv = "Title,Date Added,Type,Description\n";
+        foreach ($news as $item) {
+            $csv .= '"'.str_replace('"','""',$item->title).'",';
+            $csv .= '"'.($item->created_at ? $item->created_at->format('d/m/Y') : '').'",';
+            $csv .= '"'.str_replace('"','""',$item->type??'').'",';
+            $csv .= '"'.str_replace('"','""',strip_tags($item->description??'')).'"'."\n";
+        }
+        return response($csv, 200, [
+            'Content-Type'        => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="news-export.csv"',
+        ]);
     }
 
     // ── Verticals (Committees) ────────────────────────────────────────────────

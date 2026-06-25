@@ -3,13 +3,16 @@
 @section('title','Latest News - POBA')
 @section('content')
 
-<div class="page-header">
-    <h1>Latest News</h1>
-    <div class="underline"></div>
-</div>
-
 <section class="section-pad">
     <div class="container">
+
+        {{-- Heading with orange underline matching text width --}}
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h2 style="display: inline-block; font-size: 2.2rem; font-weight: 700; color: #086666; border-bottom: 3px solid #e87722; padding-bottom: 8px; margin: 0;">
+                Latest News
+            </h2>
+        </div>
+
         <div class="grid-4">
             @forelse($news as $item)
             <div class="card">

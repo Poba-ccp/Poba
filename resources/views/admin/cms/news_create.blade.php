@@ -1,12 +1,15 @@
-{{-- FILE: resources/views/admin/cms/news_edit.blade.php --}}
+{{-- FILE: resources/views/admin/cms/news_create.blade.php --}}
 @extends('layouts.admin')
-@section('title','Edit News - Admin')
+@section('title','Add News - Admin')
 @section('page-title','Content Management')
 
 @push('styles')
+{{-- Tiptap / Quill CDN --}}
 <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
 <style>
-    .news-create-wrap { max-width: 960px; }
+    .news-create-wrap {
+        max-width: 960px;
+    }
     .news-create-wrap .back-link {
         display: inline-flex;
         align-items: center;
@@ -22,6 +25,8 @@
         margin-bottom: 28px;
         color: #1a1a2e;
     }
+
+    /* 3-column top row */
     .news-top-row {
         display: grid;
         grid-template-columns: 180px 1fr 1fr;
@@ -29,6 +34,8 @@
         align-items: start;
         margin-bottom: 24px;
     }
+
+    /* Image upload box */
     .news-image-btn {
         display: flex;
         align-items: center;
@@ -46,6 +53,9 @@
         transition: background .15s;
     }
     .news-image-btn:hover { background: #d4ecec; }
+    .news-image-btn svg { flex-shrink: 0; }
+
+    /* Inputs */
     .news-field-label {
         font-size: 13px;
         font-weight: 600;
@@ -66,6 +76,8 @@
         transition: border-color .15s;
     }
     .news-input:focus { border-color: #1a8a8a; }
+
+    /* Description label */
     .news-desc-label {
         font-size: 13px;
         font-weight: 600;
@@ -73,6 +85,8 @@
         margin-bottom: 8px;
         display: block;
     }
+
+    /* Quill editor styling */
     .ql-toolbar.ql-snow {
         background: #1a6e6e;
         border-radius: 10px 10px 0 0;
@@ -81,11 +95,12 @@
     }
     .ql-toolbar.ql-snow .ql-stroke { stroke: #fff; }
     .ql-toolbar.ql-snow .ql-fill  { fill:  #fff; }
-    .ql-toolbar.ql-snow .ql-picker-label,
+    .ql-toolbar.ql-snow .ql-picker-label { color: #fff; }
     .ql-toolbar.ql-snow .ql-picker-label::before { color: #fff; }
     .ql-toolbar.ql-snow button:hover .ql-stroke,
     .ql-toolbar.ql-snow button.ql-active .ql-stroke { stroke: #a8e6e6; }
     .ql-toolbar.ql-snow .ql-picker-options { background: #1a6e6e; color: #fff; }
+
     .ql-container.ql-snow {
         background: #e8f4f4;
         border: 1.5px solid #c0dede;
@@ -97,6 +112,8 @@
     }
     .ql-editor { min-height: 160px; }
     .ql-editor.ql-blank::before { color: #999; font-style: normal; }
+
+    /* Footer buttons */
     .news-form-actions {
         display: flex;
         gap: 16px;
@@ -113,6 +130,7 @@
         font-size: 15px;
         font-weight: 600;
         cursor: pointer;
+        transition: background .15s;
     }
     .btn-save:hover { background: #155f5f; }
     .btn-cancel-outline {
@@ -124,12 +142,24 @@
         font-size: 15px;
         font-weight: 600;
         text-decoration: none;
+        cursor: pointer;
+        transition: background .15s;
         display: inline-block;
     }
     .btn-cancel-outline:hover { background: #fdf0f0; }
-    .img-thumb { height: 56px; border-radius: 8px; display: block; margin-bottom: 8px; }
-    #imgFileName { font-size: 12px; color: #1a8a8a; margin-top: 4px; }
-    #imgPreview { display:none; height:48px; border-radius:6px; margin-top:8px; }
+
+    /* Preview image thumbnail */
+    #imgPreview {
+        display: none;
+        height: 48px;
+        border-radius: 6px;
+        margin-top: 8px;
+    }
+    #imgFileName {
+        font-size: 12px;
+        color: #1a8a8a;
+        margin-top: 4px;
+    }
 </style>
 @endpush
 
@@ -142,23 +172,22 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
     </a>
 
-    <h2>Edit News</h2>
+    <h2>Add News</h2>
 
-    <form method="POST" action="{{ route('admin.cms.news.update', $item->id) }}" enctype="multipart/form-data" id="newsForm">
-        @csrf @method('PUT')
+    <form method="POST" action="{{ route('admin.cms.news.store') }}" enctype="multipart/form-data" id="newsForm">
+        @csrf
+
+        {{-- Hidden textarea that Quill writes into --}}
         <textarea name="description" id="descriptionInput" style="display:none"></textarea>
 
-        {{-- TOP ROW: Image | Type | Title --}}
+        {{-- TOP ROW: Image | Type | Title 1 --}}
         <div class="news-top-row">
             {{-- Image --}}
             <div>
                 <span class="news-field-label">Image:</span>
-                @if($item->image)
-                    <img src="{{ asset('storage/'.$item->image) }}" alt="News" class="img-thumb">
-                @endif
                 <button type="button" class="news-image-btn" onclick="document.getElementById('newsImgInput').click()">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    {{ $item->image ? 'Replace' : 'Image' }}
+                    Image
                 </button>
                 <input type="file" id="newsImgInput" name="image" accept="image/*" style="display:none"
                        onchange="previewImg(this)">
@@ -169,7 +198,7 @@
             {{-- Type --}}
             <div>
                 <span class="news-field-label">Type:</span>
-                <input list="typeOptions" name="type" class="news-input" placeholder="Select or type type" value="{{ old('type', $item->type) }}">
+                <input list="typeOptions" name="type" class="news-input" placeholder="Select or type type" value="{{ old('type') }}">
 <datalist id="typeOptions">
     <option value="Para Inclusive Sailing">
     <option value="Conference">
@@ -182,14 +211,14 @@
             {{-- Title --}}
             <div>
                 <span class="news-field-label">Title 1:</span>
-                <input type="text" name="title" class="news-input" value="{{ old('title', $item->title) }}" placeholder="Executive Committee" required>
+                <input type="text" name="title" class="news-input" placeholder="Executive Committee" value="{{ old('title') }}" required>
             </div>
         </div>
 
         {{-- DESCRIPTION --}}
         <div>
             <span class="news-desc-label">Description:</span>
-            <div id="quillEditor">{!! old('description', $item->description) !!}</div>
+            <div id="quillEditor">{{ old('description') }}</div>
         </div>
 
         {{-- ACTIONS --}}
@@ -203,6 +232,7 @@
 @push('scripts')
 <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 <script>
+    // Quill rich text editor
     const quill = new Quill('#quillEditor', {
         theme: 'snow',
         placeholder: 'Write news content here...',
@@ -219,20 +249,23 @@
         }
     });
 
+    // On submit, copy Quill HTML into the hidden textarea
     document.getElementById('newsForm').addEventListener('submit', function () {
         document.getElementById('descriptionInput').value = quill.root.innerHTML;
     });
 
+    // Image preview
     function previewImg(input) {
         if (input.files && input.files[0]) {
+            const file = input.files[0];
             const reader = new FileReader();
             reader.onload = e => {
                 const img = document.getElementById('imgPreview');
                 img.src = e.target.result;
                 img.style.display = 'block';
-                document.getElementById('imgFileName').textContent = '✓ ' + input.files[0].name;
+                document.getElementById('imgFileName').textContent = '✓ ' + file.name;
             };
-            reader.readAsDataURL(input.files[0]);
+            reader.readAsDataURL(file);
         }
     }
 </script>
