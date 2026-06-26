@@ -7,6 +7,7 @@
     <title>@yield('title', 'POBA - Palandarians Old Boys Association')</title>
     <meta name="description" content="@yield('meta_description', 'Official POBA Alumni Network')">
     <link rel="stylesheet" href="{{ asset('css/poba.css') }}">
+    @include('partials.theme-css')
     @stack('styles')
 </head>
 <body>

@@ -34,7 +34,7 @@ Route::get('/events',          [CustomerEventController::class, 'index'])->name(
 Route::get('/star-alumni',     [AlumniController::class, 'starAlumni'])->name('star.alumni');
 Route::get('/gallery',         [CustomerGalleryController::class, 'index'])->name('gallery.index');
 Route::get('/become-a-member', [MemberController::class, 'index'])->name('member.index');
-Route::post('/become-a-member',[MemberController::class, 'store'])->name('member.store');
+Route::post('/become-a-member', [MemberController::class, 'store'])->name('member.store');
 
 // Alumni-only routes
 Route::middleware('alumni')->group(function () {
@@ -49,7 +49,7 @@ Route::middleware('alumni')->group(function () {
     // Profile
     Route::get('/profile',          [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile',          [ProfileController::class, 'update'])->name('profile.update');
-    Route::post('/profile/password',[ProfileController::class, 'changePassword'])->name('profile.password');
+    Route::post('/profile/password', [ProfileController::class, 'changePassword'])->name('profile.password');
 });
 
 // ── Admin Panel ───────────────────────────────────────────────────────────────
@@ -171,6 +171,13 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::middleware('permission:seo')->group(function () {
         Route::get('/cms/seo',  [CmsController::class, 'seo'])->name('cms.seo');
         Route::post('/cms/seo', [CmsController::class, 'saveSeo'])->name('cms.seo.save');
+    });
+
+    // Theme Settings
+    Route::middleware('permission:seo')->group(function () {
+        Route::get('/theme',    [\App\Http\Controllers\Admin\ThemeController::class, 'index'])->name('theme.index');
+        Route::put('/theme',    [\App\Http\Controllers\Admin\ThemeController::class, 'update'])->name('theme.update');
+        Route::delete('/theme', [\App\Http\Controllers\Admin\ThemeController::class, 'reset'])->name('theme.reset');
     });
 
     // ── Admin Users — SuperAdmin only ─────────────────────────────────────────

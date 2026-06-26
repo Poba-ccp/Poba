@@ -21,21 +21,38 @@ class CmsController extends Controller
         return view('admin.cms.homepage', compact('settings'));
     }
     public function saveHomepage(Request $request) {
-        $fields = ['hero_title','hero_tagline','hero_description','hero_btn_text','hero_btn_url',
-                   'about_title','about_description','about_btn_text','about_btn_url'];
-        foreach ($fields as $f) {
-            CmsSetting::set($f, $request->$f);
-        }
-        if ($request->hasFile('hero_image')) {
-            $path = $request->file('hero_image')->store('cms','public');
-            CmsSetting::set('hero_image', $path);
-        }
-        if ($request->hasFile('about_image')) {
-            $path = $request->file('about_image')->store('cms','public');
-            CmsSetting::set('about_image', $path);
-        }
-        return back()->with('success','Homepage content saved.');
+    $fields = ['hero_title','hero_tagline','hero_description','hero_btn_text','hero_btn_url',
+           'about_title','about_description','about_btn_text','about_btn_url',
+           'about_bg_color','news_bg_color','star_alumni_bg_color'];
+    foreach ($fields as $f) {
+        CmsSetting::set($f, $request->$f);
     }
+
+    if ($request->hasFile('about_image')) {
+        $path = $request->file('about_image')->store('cms','public');
+        CmsSetting::set('about_image', $path);
+    }
+
+    // ── Hero Slides (unlimited) ──────────────────────────────
+    $slides = json_decode(CmsSetting::get('hero_slides', '[]'), true) ?: [];
+
+    if ($request->filled('remove_slides')) {
+        foreach ($request->remove_slides as $removePath) {
+            $slides = array_values(array_filter($slides, fn($s) => $s !== $removePath));
+            Storage::disk('public')->delete($removePath);
+        }
+    }
+
+    if ($request->hasFile('new_slides')) {
+        foreach ($request->file('new_slides') as $file) {
+            $slides[] = $file->store('cms/hero', 'public');
+        }
+    }
+
+    CmsSetting::set('hero_slides', json_encode($slides));
+
+    return back()->with('success','Homepage content saved.');
+}
 
     // ── About ─────────────────────────────────────────────────────────────────
     public function about() {
