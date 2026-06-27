@@ -20,17 +20,38 @@
                         value="{{ $settings['mission_title'] ?? 'Our Mission' }}" required>
                 </div>
                 <div class="admin-form-group">
-                    <label class="admin-form-label">Upload Image: *</label>
-                    @if (!empty($settings['mission_image']))
-                        <img src="{{ asset('storage/' . $settings['mission_image']) }}" alt="Mission"
-                            style="height:50px;border-radius:6px;display:block;margin-bottom:6px">
-                    @endif
-                    <div class="admin-upload" onclick="document.getElementById('missImg').click()">
-                        <span style="font-size:18px">➕</span>
-                        <p style="font-size:12px">Click to upload</p>
-                    </div>
-                    <input type="file" id="missImg" name="mission_image" accept="image/*" style="display:none">
-                </div>
+    <label class="admin-form-label">Upload Image: *</label>
+
+    <div style="display:flex;align-items:center;gap:15px;">
+
+        <!-- Upload Box -->
+        <div onclick="document.getElementById('missImg').click()"
+            style="flex:1;display:flex;align-items:center;gap:10px;background:#E6F3F4;border:1px solid #E6F3F4;border-radius:30px;padding:12px 18px;cursor:pointer;">
+
+            <span style="width:22px;height:22px;background:#0B8CA3;color:#fff;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:bold;">
+                +
+            </span>
+
+            <span style="font-size:13px;color:#666;">
+                Drag & Drop files here or click to select file(s)
+            </span>
+
+            <input type="file"
+                id="missImg"
+                name="mission_image"
+                accept="image/*"
+                style="display:none;">
+        </div>
+
+        <!-- Image Preview -->
+        @if (!empty($settings['mission_image']))
+            <img src="{{ asset('storage/' . $settings['mission_image']) }}"
+                alt="Mission"
+                style="width:55px;height:55px;object-fit:cover;border-radius:8px;border:1px solid #ddd;">
+        @endif
+
+    </div>
+</div>
             </div>
 
             <div class="admin-form-group">
@@ -38,7 +59,7 @@
                 <textarea name="mission_description" class="admin-input" rows="4">{{ $settings['mission_description'] ?? '' }}</textarea>
             </div>
 
-            <div class="admin-form-row">
+            <!-- <div class="admin-form-row">
                 <div class="admin-form-group">
                     <label class="admin-form-label">Button Text:</label>
                     <input type="text" name="mission_btn_text" class="admin-input"
@@ -49,7 +70,7 @@
                     <input type="url" name="mission_btn_url" class="admin-input"
                         value="{{ $settings['mission_btn_url'] ?? '' }}" placeholder="https://...">
                 </div>
-            </div>
+            </div> -->
 
             {{-- Stats Repeater --}}
             <div class="admin-form-group">

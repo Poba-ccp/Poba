@@ -83,7 +83,7 @@
                     <input type="text" name="about_title" class="admin-input"
                         value="{{ $settings['about_title'] ?? 'About POBA' }}" required>
                 </div>
-                <div class="admin-form-group">
+                <!-- <div class="admin-form-group">
                     <label class="admin-form-label">About Section Background Color:</label>
                     <div class="cms-color-field">
                         <input type="color" id="about_bg_color_picker"
@@ -93,7 +93,7 @@
                             value="{{ $settings['about_bg_color'] ?? '#ffffff' }}"
                             oninput="document.getElementById('about_bg_color_picker').value=this.value">
                     </div>
-                </div>
+                </div> -->
             </div>
 
             <div class="admin-form-group">
