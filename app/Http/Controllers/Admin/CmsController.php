@@ -1,5 +1,5 @@
 <?php
-// FILE: app/Http/Controllers/Admin/CmsController.php
+//  app/Http/Controllers/Admin/CmsController.php
 
 namespace App\Http\Controllers\Admin;
 
