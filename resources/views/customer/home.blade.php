@@ -132,84 +132,131 @@
     </section>
 
     <style>
-        .hero-custom {
-            position: relative;
-            overflow: hidden;
-            min-height: 480px;
-        }
+    .hero-custom {
+        position: relative;
+        overflow: hidden;
+        min-height: 480px;
+    }
 
-        .hero-slide {
-            position: absolute;
-            inset: 0;
-            background-size: cover;
-            background-position: center;
-            opacity: 0;
-            transition: opacity 1.2s ease-in-out;
-        }
+    .hero-slide {
+        position: absolute;
+        inset: 0;
+        background-size: cover;
+        background-position: center;
+        opacity: 0;
+        transition: opacity 1.2s ease-in-out;
+    }
 
-        .hero-slide.active {
-            opacity: 1;
-        }
+    .hero-slide.active {
+        opacity: 1;
+    }
 
+    .hero-overlay {
+        position: relative;
+        z-index: 2;
+        padding: 100px 60px 60px 60px;
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+    .hero-content-custom {
+        text-align: left !important;
+        max-width: 640px;
+        width: 100%;
+    }
+
+    .hero-content-custom h1 {
+        color: var(--theme-on-hero, #ffffff) !important;
+        white-space: normal;         /* was nowrap — this was breaking mobile */
+        word-break: break-word;
+        font-size: clamp(1.4rem, 4vw, 2.4rem);  /* fluid font size */
+        line-height: 1.25;
+    }
+
+    .hero-content-custom .tagline {
+        color: #FF7E40;
+        font-size: clamp(1rem, 2.5vw, 1.25rem);
+    }
+
+    .hero-content-custom .desc {
+        color: rgba(255,255,255,0.88);
+        font-size: clamp(0.875rem, 2vw, 1rem);
+    }
+
+    .hero-dots {
+        display: flex;
+        gap: 8px;
+        margin-top: 30px;
+    }
+
+    .hero-dots .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        cursor: pointer;
+    }
+
+    .hero-dots .dot.active {
+        background: #fff;
+    }
+
+    /* Tablet */
+    @media (max-width: 1024px) {
         .hero-overlay {
-            position: relative;
-            z-index: 2;
-            padding-top: 100px;
-            padding-bottom: 60px;
+            padding: 80px 40px 50px 40px;
         }
 
         .hero-content-custom {
-            text-align: left !important;
-            max-width: 640px;
+            max-width: 100%;
+        }
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+        .hero-custom {
+            min-height: 300px;
         }
 
-        .hero-content-custom h1 {
-            color: var(--theme-on-hero, #ffffff) !important;
-            white-space: nowrap;
+        .hero-overlay {
+            padding: 60px 20px 40px 20px;
+        }
+
+        .hero-content-custom {
+            max-width: 100%;
+        }
+
+        .btn-teal-capsule {
+            display: inline-block;
+            width: auto;
+            max-width: 100%;
+            white-space: normal;
+            text-align: center;
+        }
+    }
+
+    /* Small mobile */
+    @media (max-width: 480px) {
+        .hero-custom {
+            min-height: 260px;
+        }
+
+        .hero-overlay {
+            padding: 50px 16px 30px 16px;
         }
 
         .hero-dots {
-            display: flex;
-            gap: 8px;
-            margin-top: 30px;
+            margin-top: 20px;
         }
+    }
 
-        .hero-dots .dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.5);
-            cursor: pointer;
-        }
-
-        .hero-dots .dot.active {
-            background: #fff;
-        }
-
-        @media (max-width: 768px) {
-            .hero-custom {
-                min-height: 360px;
-            }
-
-            .hero-overlay {
-                padding-top: 60px;
-                padding-bottom: 30px;
-                padding-left: 20px;
-                padding-right: 20px;
-            }
-
-            .hero-content-custom {
-                max-width: 100%;
-            }
-        }
-
-        .stat-icon-custom {
-            background: transparent !important;
-            box-shadow: none !important;
-            width: auto !important;
-            height: auto !important;
-        }
-    </style>
+    .stat-icon-custom {
+        background: transparent !important;
+        box-shadow: none !important;
+        width: auto !important;
+        height: auto !important;
+    }
+</style>
 
     @if (count($heroImages) > 1)
         <script>
